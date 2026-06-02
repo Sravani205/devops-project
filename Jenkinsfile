@@ -3,23 +3,33 @@ pipeline {
 
     stages {
 
-
         stage('Build Image') {
             steps {
-                sh 'docker build -t sravani205/devops-project:v$BUILD_NUMBER .'
+                sh 'docker build -t sravani205/devops-project:$BUILD_NUMBER .'
             }
         }
 
         stage('Push Image') {
             steps {
-                sh 'docker push sravani205/devops-project:v$BUILD_NUMBER'
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+
+                    sh '''
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    docker push sravani205/devops-project:$BUILD_NUMBER
+                    '''
+                }
             }
         }
+
         stage('Deploy') {
             steps {
-             sh 'kubectl apply -f deployment.yaml'
-             sh 'kubectl apply -f service.yaml'
+                sh 'kubectl apply -f deployment.yaml'
+                sh 'kubectl apply -f service.yaml'
+            }
+        }
     }
-}
-}
 }
