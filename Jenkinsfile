@@ -27,8 +27,9 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                sh 'kubectl apply -f deployment.yaml'
-                sh 'kubectl apply -f service.yaml'
+                withEnv(["KUBECONFIG=/var/jenkins_home/.kube/config"]) {
+            sh 'kubectl apply -f deployment.yaml'
+            sh 'kubectl apply -f service.yaml'
             }
         }
     }
