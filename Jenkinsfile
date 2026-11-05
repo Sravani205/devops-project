@@ -30,6 +30,9 @@ pipeline {
                 withEnv(["KUBECONFIG=/var/jenkins_home/.kube/config"]) {
                     sh 'kubectl apply -f deployment.yaml'
                     sh 'kubectl apply -f service.yaml'
+                    // Roll out the image built in this run (deployment.yaml only holds the first version)
+                    sh 'kubectl set image deployment/devops-project app=sravani205/devops-project:$BUILD_NUMBER'
+                    sh 'kubectl rollout status deployment/devops-project --timeout=90s'
                 }
             }
         }
